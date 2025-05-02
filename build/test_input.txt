@@ -1,0 +1,17 @@
+NOReturn main() {
+    Float x = 3.14;
+    String message = "Hello, World!";
+    Bool isTrue = true;
+    
+    IfTrue (x > 2.0) {
+        message = "x is greater than 2";
+    } Otherwise {
+        message = "x is less than or equal to 2";
+    }
+    
+    RepeatWhen (x > 0) {
+        x = x - 1;
+    }
+    
+    Return 0;
+} 

@@ -1,0 +1,20 @@
+[
+{
+  "directory": "D:/compiler/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/compiler_test.dir/includes_CXX.rsp -g -std=gnu++17 -Wall -Wextra -o CMakeFiles\\compiler_test.dir\\SOURCE\\scanner.cpp.obj -c D:\\compiler\\SOURCE\\scanner.cpp",
+  "file": "D:/compiler/SOURCE/scanner.cpp",
+  "output": "CMakeFiles/compiler_test.dir/SOURCE/scanner.cpp.obj"
+},
+{
+  "directory": "D:/compiler/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/compiler_test.dir/includes_CXX.rsp -g -std=gnu++17 -Wall -Wextra -o CMakeFiles\\compiler_test.dir\\SOURCE\\parser.cpp.obj -c D:\\compiler\\SOURCE\\parser.cpp",
+  "file": "D:/compiler/SOURCE/parser.cpp",
+  "output": "CMakeFiles/compiler_test.dir/SOURCE/parser.cpp.obj"
+},
+{
+  "directory": "D:/compiler/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/compiler_test.dir/includes_CXX.rsp -g -std=gnu++17 -Wall -Wextra -o CMakeFiles\\compiler_test.dir\\SOURCE\\test_scanner.cpp.obj -c D:\\compiler\\SOURCE\\test_scanner.cpp",
+  "file": "D:/compiler/SOURCE/test_scanner.cpp",
+  "output": "CMakeFiles/compiler_test.dir/SOURCE/test_scanner.cpp.obj"
+}
+]

@@ -1,0 +1,64 @@
+# depslib dependency file v1.0
+1746202625 source:d:\compiler\compiler.cpp
+	"compiler.h"
+	"scanner.h"
+	"symbol_table.h"
+	"token.h"
+	"parser.h"
+	<iostream>
+	<sstream>
+
+1746126291 d:\compiler\compiler.h
+	<string>
+
+1746128708 d:\compiler\scanner.h
+	<string>
+	<vector>
+	"token.h"
+
+1746145695 d:\compiler\token.h
+	<string>
+
+1746199603 source:d:\compiler\scanner.cpp
+	"scanner.h"
+	"token.h"
+	<cctype>
+	<iostream>
+	<unordered_map>
+
+1746198576 source:d:\compiler\main.cpp
+	"compiler.h"
+
+1746146812 source:d:\compiler\token.cpp
+	"token.h"
+
+1746134311 d:\compiler\symbol_table.h
+	<string>
+	<unordered_map>
+	<vector>
+
+1746134395 source:d:\compiler\symbol_table.cpp
+	"symbol_table.h"
+	<iostream>
+
+1746197200 source:d:\compiler\filera7ma.cpp
+	<iostream>
+	<string>
+	<vector>
+	<memory>
+	<unordered_map>
+	<fstream>
+	<sstream>
+	<stack>
+	<cctype>
+	<iomanip>
+
+1746204108 d:\compiler\parser.h
+	<vector>
+	"token.h"
+	"symbol_table.h"
+
+1746204484 source:d:\compiler\parser.cpp
+	"parser.h"
+	<iostream>
+
