@@ -91,7 +91,6 @@ void Compiler::run() {
     // 3️⃣ Run Parser (Parser handles declarations + symtab)
     Parser parser(tokens, symtab);
     parser.parseProgram();
-
     // 4️⃣ (Optional) Print final symbol table
     symtab.printTable();
 }

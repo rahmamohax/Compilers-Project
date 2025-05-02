@@ -10,6 +10,8 @@ class Scanner {
 public:
     explicit Scanner(const std::string& source);
     std::vector<Token> scanTokens();
+     int getErrorCount() const { return errorCount; }
+
 
 private:
     std::string source;
@@ -29,7 +31,8 @@ private:
     void stringLiteral();
     void singleLineComment();
     void multiLineComment();
-
+     int errorCount = 0;
+    void error(const string& message);
 
     std::vector<Token> tokens;
 };

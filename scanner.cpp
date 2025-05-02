@@ -108,6 +108,9 @@ void Scanner::scanToken() {
                 } else if (peek() == '@') { // /@ Start multi-line comment
                     advance();
                     addToken(TokenType::SMultiComment);
+
+
+
                     multiLineComment();  // handle content
                 } else {
                     addToken(TokenType::Divide);
@@ -121,7 +124,7 @@ void Scanner::scanToken() {
             } else if (isdigit(c)) {
                 number();
             } else {
-                cerr << "Line " << line << ": Unexpected character '" << c << "'\n";
+               error("Unexpected character '" + std::string(1, c) + "'");
             }
             break;
     }
@@ -198,5 +201,10 @@ void Scanner::multiLineComment() {
     }
 
     // If reached here → unterminated comment
-    cerr << "Line " << line << ": Unterminated multi-line comment\n";
+ error("Unterminated multi-line comment");
+}
+
+void Scanner::error(const std::string& message) {
+    std::cerr << "Scanner Error at line " << line << ": " << message << "\n";
+    errorCount++;
 }

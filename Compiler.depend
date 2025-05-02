@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1746202625 source:d:\compiler\compiler.cpp
+1746208713 source:d:\compiler\compiler.cpp
 	"compiler.h"
 	"scanner.h"
 	"symbol_table.h"
@@ -11,7 +11,7 @@
 1746126291 d:\compiler\compiler.h
 	<string>
 
-1746128708 d:\compiler\scanner.h
+1746208746 d:\compiler\scanner.h
 	<string>
 	<vector>
 	"token.h"
@@ -19,7 +19,7 @@
 1746145695 d:\compiler\token.h
 	<string>
 
-1746199603 source:d:\compiler\scanner.cpp
+1746209861 source:d:\compiler\scanner.cpp
 	"scanner.h"
 	"token.h"
 	<cctype>
@@ -53,12 +53,12 @@
 	<cctype>
 	<iomanip>
 
-1746204108 d:\compiler\parser.h
+1746208762 d:\compiler\parser.h
 	<vector>
 	"token.h"
 	"symbol_table.h"
 
-1746204484 source:d:\compiler\parser.cpp
+1746208713 source:d:\compiler\parser.cpp
 	"parser.h"
 	<iostream>
 

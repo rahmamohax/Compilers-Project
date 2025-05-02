@@ -11,7 +11,7 @@ class Parser {
 public:
     Parser(const std::vector<Token>& tokens, SymbolTable& symtab);
     void parseProgram();
-
+ int getErrorCount() const { return errorCount; }
 private:
     const std::vector<Token>& tokens;
     SymbolTable& symtab;
@@ -21,7 +21,7 @@ private:
     const Token& advance();
     const Token& peek();
     bool match(TokenType type);
-    void error(const std::string& message);
+    void error(const string& message);
 
     void declaration();
     void functionDefinition();
@@ -37,6 +37,8 @@ private:
     void term();
     void factor();
     void block();
+    void handleComment();
+     int errorCount = 0;
 };
 
 

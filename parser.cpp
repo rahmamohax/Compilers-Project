@@ -27,11 +27,20 @@ bool Parser::match(TokenType type) {
 
 void Parser::error(const std::string& message) {
     std::cerr << "Parser Error at line " << peek().line << ": " << message << "\n";
+    errorCount++;
 }
-
 void Parser::parseProgram() {
     std::cout << "\n--- Parser Output ---\n";
     while (!isAtEnd()) {
+
+        // Handle comments first
+        if (peek().type == TokenType::SingleComment ||
+            peek().type == TokenType::SMultiComment ||
+            peek().type == TokenType::CommentContent ||
+            peek().type == TokenType::EMultiComment) {
+            handleComment();
+            continue;
+        }
         if (peek().type == TokenType::Integer || peek().type == TokenType::SInteger ||
             peek().type == TokenType::Character || peek().type == TokenType::String ||
             peek().type == TokenType::Float || peek().type == TokenType::SFloat ||
@@ -47,6 +56,9 @@ void Parser::parseProgram() {
             statement();
         }
     }
+
+        std::cerr << "\nTotal parser errors: " << errorCount << "\n";
+
 }
 
 void Parser::declaration() {
@@ -102,6 +114,16 @@ void Parser::functionDefinition() {
 }
 
 void Parser::statement() {
+        // Handle comments first
+    if (peek().type == TokenType::SingleComment ||
+        peek().type == TokenType::SMultiComment ||
+        peek().type == TokenType::CommentContent ||
+        peek().type == TokenType::EMultiComment) {
+        handleComment();
+        return;
+    }
+
+
     if (peek().type == TokenType::Identifier) {
         assignment();
     } else if (peek().type == TokenType::Condition) {
@@ -196,6 +218,30 @@ void Parser::simpleExpression() {
         additiveExpression();
     }
 }
+void Parser::handleComment() {
+    if (match(TokenType::SingleComment)) {
+        // Single-line comment
+        if (match(TokenType::CommentContent)) {
+            std::cout << "✅ Matched: Single-line comment: " << tokens[current-1].lexeme << "\n";
+        }
+    }
+    else if (match(TokenType::SMultiComment)) {
+        // Multi-line comment start
+        while (!isAtEnd() && peek().type != TokenType::EMultiComment) {
+            if (match(TokenType::CommentContent)) {
+                std::cout << "✅ Matched: Multi-line comment part: " << tokens[current-1].lexeme << "\n";
+            } else {
+                advance(); // skip other tokens within the comment
+            }
+        }
+        if (match(TokenType::EMultiComment)) {
+            std::cout << "✅ Matched: Multi-line comment end\n";
+        }
+    }
+    else {
+        advance(); // skip any other comment-related tokens
+    }
+}
 
 void Parser::additiveExpression() {
     term();
@@ -237,3 +283,5 @@ void Parser::block() {
 
     std::cout << "✅ Matched: Block\n";
 }
+
+
