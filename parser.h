@@ -34,6 +34,9 @@ private:
     void expression();
     void simpleExpression();
     void additiveExpression();
+    void logicalAndExpression();
+    void logicalOrExpression();
+    void synchronize();
     void term();
     void factor();
     void block();

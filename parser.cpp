@@ -1,8 +1,9 @@
 #include "parser.h"
 #include <iostream>
+#include <stdexcept>
 
 Parser::Parser(const std::vector<Token>& tokens, SymbolTable& symtab)
-    : tokens(tokens), symtab(symtab) {}
+    : tokens(tokens), symtab(symtab), current(0), errorCount(0) {}
 
 bool Parser::isAtEnd() {
     return current >= tokens.size() || tokens[current].type == TokenType::EndOfFile;
@@ -29,10 +30,37 @@ void Parser::error(const std::string& message) {
     std::cerr << "Parser Error at line " << peek().line << ": " << message << "\n";
     errorCount++;
 }
+
+void Parser::synchronize() {
+    advance(); // Skip the problematic token
+
+    // Skip until we find a statement boundary
+    while (!isAtEnd()) {
+        if (peek().type == TokenType::Semicolon) {
+            advance();
+            return;
+        }
+
+        // Statement-starting tokens
+        if (peek().type == TokenType::Integer || peek().type == TokenType::SInteger ||
+            peek().type == TokenType::Character || peek().type == TokenType::String ||
+            peek().type == TokenType::Float || peek().type == TokenType::SFloat ||
+            peek().type == TokenType::Void || peek().type == TokenType::Condition ||
+            peek().type == TokenType::Loop || peek().type == TokenType::Return ||
+            peek().type == TokenType::Break || peek().type == TokenType::LeftBrace) {
+            return;
+        }
+
+        advance();
+    }
+}
+
 void Parser::parseProgram() {
     std::cout << "\n--- Parser Output ---\n";
-    while (!isAtEnd()) {
+    const size_t maxIterations = tokens.size() * 2; // Safety limit
+    size_t iterations = 0;
 
+    while (!isAtEnd() && iterations++ < maxIterations) {
         // Handle comments first
         if (peek().type == TokenType::SingleComment ||
             peek().type == TokenType::SMultiComment ||
@@ -41,24 +69,33 @@ void Parser::parseProgram() {
             handleComment();
             continue;
         }
-        if (peek().type == TokenType::Integer || peek().type == TokenType::SInteger ||
-            peek().type == TokenType::Character || peek().type == TokenType::String ||
-            peek().type == TokenType::Float || peek().type == TokenType::SFloat ||
-            peek().type == TokenType::Void) {
-            if (current + 2 < tokens.size() &&
-                tokens[current + 1].type == TokenType::Identifier &&
-                tokens[current + 2].type == TokenType::LeftParen) {
-                functionDefinition();
+
+        try {
+            if (peek().type == TokenType::Integer || peek().type == TokenType::SInteger ||
+                peek().type == TokenType::Character || peek().type == TokenType::String ||
+                peek().type == TokenType::Float || peek().type == TokenType::SFloat ||
+                peek().type == TokenType::Void) {
+                if (current + 2 < tokens.size() &&
+                    tokens[current + 1].type == TokenType::Identifier &&
+                    tokens[current + 2].type == TokenType::LeftParen) {
+                    functionDefinition();
+                } else {
+                    declaration();
+                }
             } else {
-                declaration();
+                statement();
             }
-        } else {
-            statement();
+        } catch (const std::exception& e) {
+            error(std::string("Parsing error: ") + e.what());
+            synchronize();
         }
     }
 
-        std::cerr << "\nTotal parser errors: " << errorCount << "\n";
+    if (iterations >= maxIterations) {
+        error("Parser stuck in infinite loop - aborting");
+    }
 
+    std::cerr << "\nTotal parser errors: " << errorCount << "\n";
 }
 
 void Parser::declaration() {
@@ -114,7 +151,7 @@ void Parser::functionDefinition() {
 }
 
 void Parser::statement() {
-        // Handle comments first
+    // Handle comments first
     if (peek().type == TokenType::SingleComment ||
         peek().type == TokenType::SMultiComment ||
         peek().type == TokenType::CommentContent ||
@@ -122,7 +159,6 @@ void Parser::statement() {
         handleComment();
         return;
     }
-
 
     if (peek().type == TokenType::Identifier) {
         assignment();
@@ -206,7 +242,23 @@ void Parser::assignment() {
 }
 
 void Parser::expression() {
+    logicalOrExpression();
+}
+
+void Parser::logicalOrExpression() {
+    logicalAndExpression();
+    while (match(TokenType::Or)) {
+        logicalAndExpression();
+        std::cout << "✅ Matched: Logical OR expression\n";
+    }
+}
+
+void Parser::logicalAndExpression() {
     simpleExpression();
+    while (match(TokenType::And)) {
+        simpleExpression();
+        std::cout << "✅ Matched: Logical AND expression\n";
+    }
 }
 
 void Parser::simpleExpression() {
@@ -218,6 +270,43 @@ void Parser::simpleExpression() {
         additiveExpression();
     }
 }
+
+void Parser::additiveExpression() {
+    term();
+    while (peek().type == TokenType::Plus || peek().type == TokenType::Minus) {
+        advance();
+        term();
+    }
+}
+
+void Parser::term() {
+    factor();
+    while (peek().type == TokenType::Multiply || peek().type == TokenType::Divide) {
+        advance();
+        factor();
+    }
+}
+
+void Parser::factor() {
+    if (match(TokenType::LeftParen)) {
+        expression();
+        if (!match(TokenType::RightParen)) {
+            error("Expected ')'");
+            throw std::runtime_error("Unmatched parenthesis");
+        }
+    } else if (match(TokenType::Identifier)) {
+        if (!symtab.exists(tokens[current-1].lexeme)) {
+            std::cerr << "❌ Error: Undefined variable '" << tokens[current-1].lexeme
+                     << "' (line " << tokens[current-1].line << ")\n";
+        }
+    } else if (match(TokenType::IntgerConstant) || match(TokenType::FloatConstant)) {
+        // constant is ok
+    } else {
+        error("Expected expression factor");
+        throw std::runtime_error("Invalid factor");
+    }
+}
+
 void Parser::handleComment() {
     if (match(TokenType::SingleComment)) {
         // Single-line comment
@@ -243,35 +332,6 @@ void Parser::handleComment() {
     }
 }
 
-void Parser::additiveExpression() {
-    term();
-    while (peek().type == TokenType::Plus || peek().type == TokenType::Minus) {
-        advance();
-        term();
-    }
-}
-
-void Parser::term() {
-    factor();
-    while (peek().type == TokenType::Multiply || peek().type == TokenType::Divide) {
-        advance();
-        factor();
-    }
-}
-
-void Parser::factor() {
-    if (match(TokenType::LeftParen)) {
-        expression();
-        if (!match(TokenType::RightParen)) { error("Expected ')'"); }
-    } else if (match(TokenType::Identifier)) {
-        // Optional semantic check can be added here
-    } else if (match(TokenType::IntgerConstant) || match(TokenType::FloatConstant)) {
-        // constant is ok
-    } else {
-        error("Expected expression factor");
-    }
-}
-
 void Parser::block() {
     if (!match(TokenType::LeftBrace)) { error("Expected '{'"); return; }
 
@@ -283,5 +343,3 @@ void Parser::block() {
 
     std::cout << "✅ Matched: Block\n";
 }
-
-
