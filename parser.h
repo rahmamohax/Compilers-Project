@@ -16,12 +16,16 @@ private:
     const std::vector<Token>& tokens;
     SymbolTable& symtab;
     size_t current = 0;
-
+   int currentLine();
     bool isAtEnd();
     const Token& advance();
     const Token& peek();
     bool match(TokenType type);
     void error(const string& message);
+    void printMatch(const string& rule, const string& extra = "");
+void printError(const string& message, const string& context);
+
+
 
     void declaration();
     void functionDefinition();

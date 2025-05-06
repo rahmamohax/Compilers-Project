@@ -425,8 +425,7 @@ std::unique_ptr<ExpressionNode> Parser::parsePrimary() {
 
 bool Parser::isTypeToken(TokenType type) const {
     return type == TokenType::IMW || type == TokenType::FLOAT ||
-           type == TokenType::STRING || type == TokenType::BOOL ||
-           type == TokenType::VOID;
+           type == TokenType::STRING || type == TokenType::BOOL;
 }
 
 bool Parser::isBinaryOperator(TokenType type) const {
@@ -485,4 +484,4 @@ std::unique_ptr<ASTNode> Parser::parseRepeatWhenStmt() {
     
     return std::make_unique<RepeatWhenStmtNode>(std::move(condition), std::move(body),
                                               currentToken.line, currentToken.column);
-} 
+}

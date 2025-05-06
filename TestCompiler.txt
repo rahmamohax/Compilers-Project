@@ -1,0 +1,31 @@
+
+
+--------------Loop---------------------
+Imw x; 
+x=5;
+RepeatWhen(x<10){
+
+x=x+1;
+}
+end
+------------------------Declare and Assign in block-----------------------------
+Imw x; 
+x=5;
+RepeatWhen(x<10){
+Imw z;
+x=x+1;
+}
+end
+
+---------------------------Logical opretion in it --------------------
+Imw x; 
+x=5;
+RepeatWhen(x<10){
+Imw z;
+3&&4;
+4||3;
+x=x+1;
+}
+end
+
+-----------------------------

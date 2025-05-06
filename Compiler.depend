@@ -53,12 +53,12 @@
 	<cctype>
 	<iomanip>
 
-1746455105 d:\compiler\parser.h
+1746566457 d:\compiler\parser.h
 	<vector>
 	"token.h"
 	"symbol_table.h"
 
-1746455393 source:d:\compiler\parser.cpp
+1746565589 source:d:\compiler\parser.cpp
 	"parser.h"
 	<iostream>
 	<stdexcept>

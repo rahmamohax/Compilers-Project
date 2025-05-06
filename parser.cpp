@@ -1,8 +1,10 @@
 #include "parser.h"
 #include <iostream>
 #include <stdexcept>
+ using namespace std;
 
-Parser::Parser(const std::vector<Token>& tokens, SymbolTable& symtab)
+
+Parser::Parser(const vector<Token>& tokens, SymbolTable& symtab)
     : tokens(tokens), symtab(symtab), current(0), errorCount(0) {}
 
 bool Parser::isAtEnd() {
@@ -26,8 +28,8 @@ bool Parser::match(TokenType type) {
     return false;
 }
 
-void Parser::error(const std::string& message) {
-    std::cerr << "Parser Error at line " << peek().line << ": " << message << "\n";
+void Parser::error(const string& message) {
+    cerr << "Parser Error at line   " <<"Line:: "<<peek().line << ": " << message << "\n";
     errorCount++;
 }
 
@@ -56,7 +58,7 @@ void Parser::synchronize() {
 }
 
 void Parser::parseProgram() {
-    std::cout << "\n--- Parser Output ---\n";
+    cout << "\n--- Parser Output ---\n";
     const size_t maxIterations = tokens.size() * 2; // Safety limit
     size_t iterations = 0;
 
@@ -73,8 +75,8 @@ void Parser::parseProgram() {
         try {
             if (peek().type == TokenType::Integer || peek().type == TokenType::SInteger ||
                 peek().type == TokenType::Character || peek().type == TokenType::String ||
-                peek().type == TokenType::Float || peek().type == TokenType::SFloat ||
-                peek().type == TokenType::Void) {
+                peek().type == TokenType::Float || peek().type == TokenType::SFloat
+                ) {
                 if (current + 2 < tokens.size() &&
                     tokens[current + 1].type == TokenType::Identifier &&
                     tokens[current + 2].type == TokenType::LeftParen) {
@@ -85,8 +87,8 @@ void Parser::parseProgram() {
             } else {
                 statement();
             }
-        } catch (const std::exception& e) {
-            error(std::string("Parsing error: ") + e.what());
+        } catch (const exception& e) {
+            error(string("Parsing error: ") + e.what());
             synchronize();
         }
     }
@@ -95,28 +97,30 @@ void Parser::parseProgram() {
         error("Parser stuck in infinite loop - aborting");
     }
 
-    std::cerr << "\nTotal parser errors: " << errorCount << "\n";
+    cerr << "\nTotal parser errors: " << errorCount << "\n";
 }
 
 void Parser::declaration() {
     Token typeToken = advance();
     SymbolType varType;
-    switch (typeToken.type) {
+
+    switch(typeToken.type) {
         case TokenType::Integer: varType = SymbolType::Integer; break;
         case TokenType::SInteger: varType = SymbolType::SInteger; break;
         case TokenType::Character: varType = SymbolType::Character; break;
         case TokenType::String: varType = SymbolType::String; break;
         case TokenType::Float: varType = SymbolType::Float; break;
         case TokenType::SFloat: varType = SymbolType::SFloat; break;
-        case TokenType::Void: varType = SymbolType::Void; break;
-        default: varType = SymbolType::Unknown; break;
-    }
 
+        default:
+            error("Invalid type");
+            return;
+    }
     if (!match(TokenType::Identifier)) { error("Expected variable name"); return; }
-    std::string varName = tokens[current - 1].lexeme;
+    string varName = tokens[current - 1].lexeme;
 
     if (!symtab.declareVariable(varName, varType)) {
-        std::cerr << "Error: Variable '" << varName << "' already declared (line " << tokens[current - 1].line << ")\n";
+        cerr << "Error: Variable '" << varName << "' already declared (line " << tokens[current - 1].line << ")\n";
     }
 
     while (peek().type == TokenType::Comma) {
@@ -124,30 +128,51 @@ void Parser::declaration() {
         if (!match(TokenType::Identifier)) { error("Expected variable name"); return; }
         varName = tokens[current - 1].lexeme;
         if (!symtab.declareVariable(varName, varType)) {
-            std::cerr << "Error: Variable '" << varName << "' already declared (line " << tokens[current - 1].line << ")\n";
+            cerr << "Error: Variable '" << varName << "' already declared (line " << tokens[current - 1].line << ")\n";
         }
     }
 
     if (!match(TokenType::Semicolon)) { error("Expected ';'"); return; }
 
-    std::cout << "✅ Matched: Declaration\n";
+    cout << "Matched: var-declaration    "<<"Line::  "<<peek().line-1<<"\n";
 }
 
 void Parser::functionDefinition() {
-    advance(); // return type
+    // Handle NOReturn (void) along with other types
+    Token returnType = advance();
+    SymbolType returnSymType;
+
+    switch(returnType.type) {
+        case TokenType::Integer: returnSymType = SymbolType::Integer; break;
+        case TokenType::SInteger: returnSymType = SymbolType::SInteger; break;
+        case TokenType::Character: returnSymType = SymbolType::Character; break;
+        case TokenType::String: returnSymType = SymbolType::String; break;
+        case TokenType::Float: returnSymType = SymbolType::Float; break;
+        case TokenType::SFloat: returnSymType = SymbolType::SFloat; break;
+        case TokenType::Void: returnSymType = SymbolType::Void; break;  // Added this line
+        default:
+            error("Invalid return type");
+            return;
+    }
+
     if (!match(TokenType::Identifier)) { error("Expected function name"); return; }
+    string funcName = tokens[current-1].lexeme;
 
-    if (!match(TokenType::LeftParen)) { error("Expected '('"); return; }
-
-    // Skip params safely
-    while (peek().type != TokenType::RightParen && !isAtEnd()) {
+    if (!match(TokenType::LeftParen)) { error("Expected '(' after function name"); return; }
+    // For now, skip parameters
+    while (!match(TokenType::RightParen)) {
         advance();
     }
-    if (!match(TokenType::RightParen)) { error("Expected ')'"); return; }
 
-    std::cout << "✅ Matched: Function Definition\n";
+    if (!match(TokenType::LeftBrace)) { error("Expected '{' at start of function body"); return; }
 
-    block();
+    while (!match(TokenType::RightBrace)) {
+        statement();
+        if (isAtEnd()) { error("Unterminated function body"); return; }
+    }
+
+    cout << " Matched:  fun-declaration   (" << funcName << ") "<<"Line::  "<<peek().line-1<<"\n";
+    // Rest of the function definition code...
 }
 
 void Parser::statement() {
@@ -170,18 +195,36 @@ void Parser::statement() {
         jumpStatement();
     } else if (peek().type == TokenType::LeftBrace) {
         block();
-    } else if (peek().type == TokenType::Semicolon) {
+    }else if(peek().type==TokenType::Void){
+        functionDefinition();
+    }
+     else if (peek().type == TokenType::Semicolon) {
         match(TokenType::Semicolon);
-        std::cout << "✅ Matched: Empty Statement\n";
-    } else {
+        cout << " Matched: Empty Statement\n";
+    } else if (peek().type == TokenType::Integer || peek().type == TokenType::SInteger ||
+                        peek().type == TokenType::Character || peek().type == TokenType::String ||
+                        peek().type == TokenType::Float || peek().type == TokenType::SFloat
+                        ) {
+                        if (current + 2 < tokens.size() &&
+                            tokens[current + 1].type == TokenType::Identifier &&
+                            tokens[current + 2].type == TokenType::LeftParen) {
+                            functionDefinition();
+                        } else {
+                            declaration();
+                        }
+
+
+   } else {
         expressionStatement();
     }
+
+    //
 }
 
 void Parser::expressionStatement() {
     expression();
     if (!match(TokenType::Semicolon)) { error("Expected ';'"); return; }
-    std::cout << "✅ Matched: Expression Statement\n";
+    cout << " Matched: Expression Statement\n";
 }
 
 void Parser::selectionStatement() {
@@ -197,18 +240,27 @@ void Parser::selectionStatement() {
         statement();
     }
 
-    std::cout << "✅ Matched: If/Else Statement\n";
+    cout << " Matched: If/Else Statement    "<<"Line::  "<<peek().line-1;
 }
 
 void Parser::iterationStatement() {
-    advance(); // RepeatWhen
-    if (!match(TokenType::LeftParen)) { error("Expected '('"); return; }
-    expression();
-    if (!match(TokenType::RightParen)) { error("Expected ')'"); return; }
+    Token loopToken = advance(); // Could be RepeatWhen or Reiterate
 
-    statement();
+    if (!match(TokenType::LeftParen)) {
+        error("Expected '(' after loop condition");
+        return;
+    }
 
-    std::cout << "✅ Matched: Loop Statement\n";
+    expression(); // Parse the condition
+
+    if (!match(TokenType::RightParen)) {
+        error("Expected ')' after loop condition");
+        return;
+    }
+
+    statement(); // Parse the loop body
+
+    cout << " Matched: Loop Statement (" << loopToken.lexeme << ")  "<< peek().line-1<<"\n";
 }
 
 void Parser::jumpStatement() {
@@ -217,19 +269,19 @@ void Parser::jumpStatement() {
     if (jumpTok.type == TokenType::Return) {
         expression();
         if (!match(TokenType::Semicolon)) { error("Expected ';'"); return; }
-        std::cout << "✅ Matched: Return Statement\n";
+        cout << " Matched: Return Statement\n";
     } else if (jumpTok.type == TokenType::Break) {
         if (!match(TokenType::Semicolon)) { error("Expected ';'"); return; }
-        std::cout << "✅ Matched: Break Statement\n";
+        cout << " Matched: Break Statement\n";
     }
 }
 
 void Parser::assignment() {
     if (!match(TokenType::Identifier)) { error("Expected identifier"); return; }
-    std::string varName = tokens[current - 1].lexeme;
+    string varName = tokens[current - 1].lexeme;
 
     if (!symtab.exists(varName)) {
-        std::cerr << "❌ Error: Variable '" << varName << "' not declared before use (line " << tokens[current - 1].line << ")\n";
+        cerr << "❌ Error: Variable '" << varName << "' not declared before use (line " << tokens[current - 1].line << ")\n";
     }
 
     if (!match(TokenType::Assignment)) { error("Expected '='"); return; }
@@ -238,7 +290,7 @@ void Parser::assignment() {
 
     if (!match(TokenType::Semicolon)) { error("Expected ';'"); return; }
 
-    std::cout << "✅ Matched: Assignment\n";
+    cout << " Matched: Assignment   "<<"Line::  "<<peek().line-1<<"\n";
 }
 
 void Parser::expression() {
@@ -249,7 +301,7 @@ void Parser::logicalOrExpression() {
     logicalAndExpression();
     while (match(TokenType::Or)) {
         logicalAndExpression();
-        std::cout << "✅ Matched: Logical OR expression\n";
+        cout << " Matched: Logical OR expression"<<"Line::  "<<peek().line-1<<"\n";
     }
 }
 
@@ -257,8 +309,7 @@ void Parser::logicalAndExpression() {
     simpleExpression();
     while (match(TokenType::And)) {
         simpleExpression();
-        std::cout << "✅ Matched: Logical AND expression\n";
-    }
+cout << " Matched: Logical And expression"<<"Line::  "<<peek().line-1<<"\n";    }
 }
 
 void Parser::simpleExpression() {
@@ -292,18 +343,18 @@ void Parser::factor() {
         expression();
         if (!match(TokenType::RightParen)) {
             error("Expected ')'");
-            throw std::runtime_error("Unmatched parenthesis");
+            throw runtime_error("Unmatched parenthesis");
         }
     } else if (match(TokenType::Identifier)) {
         if (!symtab.exists(tokens[current-1].lexeme)) {
-            std::cerr << "❌ Error: Undefined variable '" << tokens[current-1].lexeme
+            cerr << "❌ Error: Undefined variable '" << tokens[current-1].lexeme
                      << "' (line " << tokens[current-1].line << ")\n";
         }
     } else if (match(TokenType::IntgerConstant) || match(TokenType::FloatConstant)) {
         // constant is ok
     } else {
         error("Expected expression factor");
-        throw std::runtime_error("Invalid factor");
+        throw runtime_error("Invalid factor");
     }
 }
 
@@ -311,20 +362,20 @@ void Parser::handleComment() {
     if (match(TokenType::SingleComment)) {
         // Single-line comment
         if (match(TokenType::CommentContent)) {
-            std::cout << "✅ Matched: Single-line comment: " << tokens[current-1].lexeme << "\n";
+            cout << " Matched: Single-line comment: " << tokens[current-1].lexeme << "\n";
         }
     }
     else if (match(TokenType::SMultiComment)) {
         // Multi-line comment start
         while (!isAtEnd() && peek().type != TokenType::EMultiComment) {
             if (match(TokenType::CommentContent)) {
-                std::cout << "✅ Matched: Multi-line comment part: " << tokens[current-1].lexeme << "\n";
+                cout << " Matched: Multi-line comment part: " << tokens[current-1].lexeme << "\n";
             } else {
                 advance(); // skip other tokens within the comment
             }
         }
         if (match(TokenType::EMultiComment)) {
-            std::cout << "✅ Matched: Multi-line comment end\n";
+            cout << " Matched: Multi-line comment end\n";
         }
     }
     else {
@@ -341,5 +392,5 @@ void Parser::block() {
 
     if (!match(TokenType::RightBrace)) { error("Expected '}'"); return; }
 
-    std::cout << "✅ Matched: Block\n";
+    cout << " Matched: Block    " << peek().line-1<<"\n";
 }
