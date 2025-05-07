@@ -138,6 +138,7 @@ void Parser::declaration() {
 }
 
 void Parser::functionDefinition() {
+
     // Handle NOReturn (void) along with other types
     Token returnType = advance();
     SymbolType returnSymType;
@@ -163,6 +164,7 @@ void Parser::functionDefinition() {
     while (!match(TokenType::RightParen)) {
         advance();
     }
+
 
     if (!match(TokenType::LeftBrace)) { error("Expected '{' at start of function body"); return; }
 
@@ -260,7 +262,7 @@ void Parser::iterationStatement() {
 
     statement(); // Parse the loop body
 
-    cout << " Matched: Loop Statement (" << loopToken.lexeme << ")  "<< peek().line-1<<"\n";
+    cout << " Matched: Itration-Statement (" << loopToken.lexeme << ")  "<< peek().line-1<<"\n";
 }
 
 void Parser::jumpStatement() {
@@ -269,10 +271,10 @@ void Parser::jumpStatement() {
     if (jumpTok.type == TokenType::Return) {
         expression();
         if (!match(TokenType::Semicolon)) { error("Expected ';'"); return; }
-        cout << " Matched: Return Statement\n";
+        cout << " Matched: Jump-Statement\n";
     } else if (jumpTok.type == TokenType::Break) {
         if (!match(TokenType::Semicolon)) { error("Expected ';'"); return; }
-        cout << " Matched: Break Statement\n";
+        cout << " Matched: Jump-Statement\n";
     }
 }
 
@@ -281,7 +283,7 @@ void Parser::assignment() {
     string varName = tokens[current - 1].lexeme;
 
     if (!symtab.exists(varName)) {
-        cerr << "❌ Error: Variable '" << varName << "' not declared before use (line " << tokens[current - 1].line << ")\n";
+        cerr << " Error: Variable '" << varName << "' not declared before use (line " << tokens[current - 1].line << ")\n";
     }
 
     if (!match(TokenType::Assignment)) { error("Expected '='"); return; }
@@ -347,7 +349,7 @@ void Parser::factor() {
         }
     } else if (match(TokenType::Identifier)) {
         if (!symtab.exists(tokens[current-1].lexeme)) {
-            cerr << "❌ Error: Undefined variable '" << tokens[current-1].lexeme
+            cerr << " Error: Undefined variable '" << tokens[current-1].lexeme
                      << "' (line " << tokens[current-1].line << ")\n";
         }
     } else if (match(TokenType::IntgerConstant) || match(TokenType::FloatConstant)) {
