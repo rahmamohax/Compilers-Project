@@ -85,12 +85,9 @@ void Compiler::run() {
                   << "\n";
     }
 
-    // 2️⃣ Create empty symbol table
-    SymbolTable symtab;
-
-    // 3️⃣ Run Parser (Parser handles declarations + symtab)
+  SymbolTable symtab;
     Parser parser(tokens, symtab);
     parser.parseProgram();
     // 4️⃣ (Optional) Print final symbol table
-    symtab.printTable();
+
 }

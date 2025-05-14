@@ -29,3 +29,18 @@ x=x+1;
 end
 
 -----------------------------
+
+
+
+ /@ This is main function @/  
+NOReturn decrease(Imw d,Imw g) { 
+
+d=d + 5;  
+g=g + 6;
+
+ RepeatWhen (counter < 0) {  
+
+ 
+}  
+Turnback 5;
+} 

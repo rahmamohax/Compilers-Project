@@ -56,19 +56,24 @@ void Scanner::skipWhitespace() {
 void Scanner::scanToken() {
     skipWhitespace();
     if (isAtEnd()) return;
-    start= current;
+    start = current;
 
     char c = advance();
 
+    // Handle + or - and check if followed by digit (signed number)
+    if (c == '+' || c == '-') {
+        if (isdigit(peek())) {
+            number(c);  // pass + or - to number()
+            return;
+        } else {
+            addToken((c == '+') ? TokenType::Plus : TokenType::Minus);
+            return;
+        }
+    }
+
     // Single character tokens
     switch (c) {
-        case '+': addToken(TokenType::Plus); break;
-        case '-':
-            if (peek() == '>') { advance(); addToken(TokenType::Access); }
-            else addToken(TokenType::Minus);
-            break;
         case '*': addToken(TokenType::Multiply); break;
-
         case '=':
             if (peek() == '=') { advance(); addToken(TokenType::Equal); }
             else addToken(TokenType::Assignment);
@@ -99,36 +104,26 @@ void Scanner::scanToken() {
         case ')': addToken(TokenType::RightParen); break;
         case ';': addToken(TokenType::Semicolon); break;
         case ',': addToken(TokenType::Comma); break;
-      //   case '"': stringLiteral(); break;
         case '/':
-                if (peek() == '^') { // /^ Single-line comment
-                    advance();
-                    addToken(TokenType::SingleComment);
-                    singleLineComment();  // handle content
-                } else if (peek() == '@') { // /@ Start multi-line comment
-                    advance();
-                    addToken(TokenType::SMultiComment);
-
-
-
-                    multiLineComment();  // handle content
-                } else {
-                    addToken(TokenType::Divide);
-                }
-    break;
-
+            if (peek() == '^') { advance(); addToken(TokenType::SingleComment); singleLineComment(); }
+            else if (peek() == '@') { advance(); addToken(TokenType::SMultiComment); multiLineComment(); }
+            else { addToken(TokenType::Divide); }
+            break;
 
         default:
             if (isalpha(c) || c == '_') {
                 identifier();
-            } else if (isdigit(c)) {
-                number();
-            } else {
-               error("Unexpected character '" + std::string(1, c) + "'");
+            }
+            else if (isdigit(c)) {
+                number(c);
+            }
+            else {
+                error("Unexpected character '" + std::string(1, c) + "'");
             }
             break;
     }
 }
+
 
 // Keyword map
 unordered_map<string, TokenType> keywords = {
@@ -160,8 +155,15 @@ void Scanner::identifier() {
     }
 }
 
-void Scanner::number() {
+void Scanner::number(char firstChar) {
     bool isFloat = false;
+    bool isSigned = false;
+    size_t numberStart = start;
+
+    if (firstChar == '+' || firstChar == '-') {
+        isSigned = true;
+        advance();  // consume '+' or '-'
+    }
 
     while (isdigit(peek())) advance();
 
@@ -171,10 +173,19 @@ void Scanner::number() {
         while (isdigit(peek())) advance();
     }
 
+    // Extract full text (+4, -3.14, etc)
+    string text = source.substr(numberStart, current - numberStart);
+
     if (isFloat) {
-        addToken(TokenType::FloatConstant);
+        if (isSigned)
+            tokens.emplace_back(TokenType::SignedFloatConstant, text, line);
+        else
+            tokens.emplace_back(TokenType::FloatConstant, text, line);
     } else {
-        addToken(TokenType::IntgerConstant);
+        if (isSigned)
+            tokens.emplace_back(TokenType::SignedIntegerConstant, text, line);
+        else
+            tokens.emplace_back(TokenType::IntgerConstant, text, line);
     }
 }
 

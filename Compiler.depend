@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1746443734 source:d:\compiler\compiler.cpp
+1746726822 source:d:\compiler\compiler.cpp
 	"compiler.h"
 	"scanner.h"
 	"symbol_table.h"
@@ -8,38 +8,40 @@
 	<iostream>
 	<sstream>
 
-1746126291 d:\compiler\compiler.h
+1746726801 d:\compiler\compiler.h
 	<string>
 
-1746208746 d:\compiler\scanner.h
+1746726801 d:\compiler\scanner.h
 	<string>
 	<vector>
 	"token.h"
 
-1746145695 d:\compiler\token.h
+1746720188 d:\compiler\token.h
 	<string>
 
-1746209861 source:d:\compiler\scanner.cpp
+1746726801 source:d:\compiler\scanner.cpp
 	"scanner.h"
 	"token.h"
 	<cctype>
 	<iostream>
 	<unordered_map>
 
-1746198576 source:d:\compiler\main.cpp
+1746725101 source:d:\compiler\main.cpp
 	"compiler.h"
 
-1746146812 source:d:\compiler\token.cpp
+1746720188 source:d:\compiler\token.cpp
 	"token.h"
 
-1746134311 d:\compiler\symbol_table.h
+1746726801 d:\compiler\symbol_table.h
 	<string>
-	<unordered_map>
 	<vector>
+	<map>
 
-1746134395 source:d:\compiler\symbol_table.cpp
+1746726871 source:d:\compiler\symbol_table.cpp
 	"symbol_table.h"
-	<iostream>
+	<stdexcept>
+	<vector>
+	<map>
 
 1746197200 source:d:\compiler\filera7ma.cpp
 	<iostream>
@@ -53,12 +55,13 @@
 	<cctype>
 	<iomanip>
 
-1746566457 d:\compiler\parser.h
+1746726801 d:\compiler\parser.h
 	<vector>
+	<string>
 	"token.h"
 	"symbol_table.h"
 
-1746627325 source:d:\compiler\parser.cpp
+1746726839 source:d:\compiler\parser.cpp
 	"parser.h"
 	<iostream>
 	<stdexcept>

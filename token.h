@@ -56,7 +56,12 @@ enum class TokenType
     // Literals & Identifiers
     Identifier,
     IntgerConstant, // 0...9
-    FloatConstant, // 0.0 ... 9.9
+    FloatConstant,
+    SignedIntegerConstant,
+    SignedFloatConstant,
+    CharConstant,
+    StringConstant,
+    // 0.0 ... 9.9
 
     // Comments
     SMultiComment, // /@

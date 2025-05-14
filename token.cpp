@@ -5,6 +5,11 @@ string tokenTypeToString(TokenType type) {
         case TokenType::Condition: return "Condition";
         case TokenType::Integer: return "Integer";
         case TokenType::SInteger: return "SInteger";
+        case TokenType::SignedIntegerConstant: return"INTgerSIgned";
+        case TokenType::SignedFloatConstant: return"FloatSIgned";
+        case TokenType::CharConstant:return "CharConstant";
+        case TokenType::StringConstant:return"StringConstant";
+
         case TokenType::Character: return "Character";
         case TokenType::String: return "String";
         case TokenType::Float: return "Float";

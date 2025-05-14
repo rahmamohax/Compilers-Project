@@ -1,62 +1,81 @@
 #include "symbol_table.h"
-#include <iostream>
+#include <stdexcept>
+#include <vector>
+#include <map>
 
-bool SymbolTable::declareVariable(const std::string& name, SymbolType type) {
-    if (exists(name)) return false;
-    table.emplace(name, Symbol(name, SymbolKind::Variable, type));
-    return true;
+using std::vector;
+
+void SymbolTable::enterScope() {
+    variableScopes.emplace_back();
 }
 
-bool SymbolTable::declareFunction(const std::string& name, SymbolType returnType, const std::vector<SymbolType>& params) {
-    if (exists(name)) return false;
-    Symbol sym(name, SymbolKind::Function, returnType);
-    sym.paramTypes = params;
-    table.emplace(name, sym);
-    return true;
-}
-
-bool SymbolTable::declareStruct(const std::string& name) {
-    if (exists(name)) return false;
-    table.emplace(name, Symbol(name, SymbolKind::Struct, SymbolType::Unknown));
-    return true;
-}
-
-bool SymbolTable::exists(const std::string& name) {
-    return table.find(name) != table.end();
-}
-
-Symbol* SymbolTable::lookup(const std::string& name) {
-    auto it = table.find(name);
-    if (it != table.end()) {
-        return &(it->second);
+void SymbolTable::exitScope() {
+    if (!variableScopes.empty()) {
+        variableScopes.pop_back();
     }
-    return nullptr;
 }
 
-void SymbolTable::printTable() {
-    std::cout << "\n----- Symbol Table -----\n";
-    for (const auto& pair : table) {
-        const std::string& name = pair.first;
-        const Symbol& symbol = pair.second;
+bool SymbolTable::declareVariable(const string& name, SymbolType type) {
+    if (variableScopes.empty()) {
+        variableScopes.emplace_back();
+    }
+    auto& currentScope = variableScopes.back();
+    if (currentScope.find(name) != currentScope.end() || functions.find(name) != functions.end()) {
+        return false; // Variable or function already declared
+    }
+    currentScope[name] = type;
+    return true;
+}
 
-        std::cout << "Name: " << name
-                  << ", Kind: " << (symbol.kind == SymbolKind::Variable ? "Var" :
-                                   symbol.kind == SymbolKind::Function ? "Func" : "Struct")
-                  << ", Type: ";
+bool SymbolTable::declareFunction(const string& name, SymbolType returnType, const vector<SymbolType>& paramTypes) {
+    if (functions.find(name) != functions.end() ||
+        (!variableScopes.empty() && variableScopes.back().find(name) != variableScopes.back().end())) {
+        return false; // Function or variable already declared
+    }
+    functions.emplace(name, FunctionSignature(returnType, paramTypes));
+    return true;
+}
 
-        switch (symbol.type) {
-            case SymbolType::Integer: std::cout << "Integer"; break;
-            case SymbolType::SInteger: std::cout << "SInteger"; break;
-            case SymbolType::Character: std::cout << "Character"; break;
-            case SymbolType::String: std::cout << "String"; break;
-            case SymbolType::Float: std::cout << "Float"; break;
-            case SymbolType::SFloat: std::cout << "SFloat"; break;
-            case SymbolType::Void: std::cout << "Void"; break;
-            default: std::cout << "Unknown"; break;
+bool SymbolTable::exists(const string& name) const {
+    for (auto it = variableScopes.rbegin(); it != variableScopes.rend(); ++it) {
+        if (it->find(name) != it->end()) {
+            return true;
         }
-
-        std::cout << "\n";
     }
-    std::cout << "------------------------\n";
+    return false;
 }
 
+bool SymbolTable::functionExists(const string& name) const {
+    return functions.find(name) != functions.end();
+}
+
+SymbolType SymbolTable::getVariableType(const string& name) const {
+    for (auto it = variableScopes.rbegin(); it != variableScopes.rend(); ++it) {
+        auto varIt = it->find(name);
+        if (varIt != it->end()) {
+            return varIt->second;
+        }
+    }
+    throw std::runtime_error("Variable '" + name + "' not found");
+}
+
+SymbolTable::FunctionSignature SymbolTable::getFunctionSignature(const string& name) const {
+    auto it = functions.find(name);
+    if (it == functions.end()) {
+        throw std::runtime_error("Function '" + name + "' not found");
+    }
+    return it->second;
+}
+
+string SymbolTable::typeToString(SymbolType type) const {
+    switch (type) {
+        case SymbolType::Integer: return "Integer";
+        case SymbolType::SInteger: return "SInteger";
+        case SymbolType::Float: return "Float";
+        case SymbolType::SFloat: return "SFloat";
+        case SymbolType::Character: return "Character";
+        case SymbolType::String: return "String";
+        case SymbolType::Void: return "Void";
+        default: return "Unknown";
+    }
+}

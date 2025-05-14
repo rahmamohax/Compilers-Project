@@ -27,7 +27,7 @@ private:
     void scanToken();
     void skipWhitespace();
     void identifier();
-    void number();
+    void number(char firstchar);
     void stringLiteral();
     void singleLineComment();
     void multiLineComment();
