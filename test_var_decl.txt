@@ -1,0 +1,6 @@
+Imw dec(){
+Imw num;
+num = 3;
+Imw 3x = 22;
+Imw xx = 3;
+} 

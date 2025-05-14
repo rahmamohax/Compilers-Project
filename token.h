@@ -1,5 +1,5 @@
-#ifndef Token_include
-#define Token_include
+#ifndef TOKEN_H
+#define TOKEN_H
 
 #include <string>
 using namespace std;
@@ -7,7 +7,6 @@ using namespace std;
 enum class TokenType
 {
     // Keywords
-    Condition,
     Integer,
     SInteger,
     Character,
@@ -15,6 +14,7 @@ enum class TokenType
     Float,
     SFloat,
     Void,
+    Condition,
     Loop,
     Return,
     Break,

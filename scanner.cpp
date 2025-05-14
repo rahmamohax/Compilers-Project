@@ -14,6 +14,7 @@ vector<Token> Scanner::scanTokens() {
         scanToken();
     }
     tokens.emplace_back(TokenType::EndOfFile, "", line);
+    // Error reporting is now handled by the compiler
     return tokens;
 }
 
@@ -115,7 +116,12 @@ void Scanner::scanToken() {
                 identifier();
             }
             else if (isdigit(c)) {
-                number(c);
+                // Check if this is an invalid identifier (digit followed by letters)
+                if (isalpha(peek()) || peek() == '_') {
+                    invalidIdentifier(c);
+                } else {
+                    number(c);
+                }
             }
             else {
                 error("Unexpected character '" + std::string(1, c) + "'");
@@ -124,6 +130,14 @@ void Scanner::scanToken() {
     }
 }
 
+void Scanner::invalidIdentifier(char firstChar) {
+    // Consume all alphanumeric characters
+    while (isalnum(peek()) || peek() == '_') advance();
+    string text = source.substr(start, current - start);
+    error("Invalid identifier '" + text + "' - identifiers cannot start with a digit");
+    // Still add the token but mark it as Invalid
+    tokens.emplace_back(TokenType::Invalid, text, line);
+}
 
 // Keyword map
 unordered_map<string, TokenType> keywords = {
@@ -216,6 +230,7 @@ void Scanner::multiLineComment() {
 }
 
 void Scanner::error(const std::string& message) {
-    std::cerr << "Scanner Error at line " << line << ": " << message << "\n";
+    // Store error instead of printing immediately
+    errors.emplace_back(line, message);
     errorCount++;
 }

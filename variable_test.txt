@@ -1,0 +1,25 @@
+NOReturn main(){
+    /^ Valid declarations (without initialization)
+    Imw validVar;
+    validVar = 10;
+    
+    /^ Invalid declarations (with initialization)
+    Imw invalidVar = 20;
+    
+    /^ Invalid identifier (starts with digit)
+    Imw 5invalid = 30;
+    
+    /^ More valid code
+    Imw x;
+    Imw y;
+    x = 5;
+    y = 10;
+    
+    IfTrue (x < y) {
+        x = x + 1;
+    } Otherwise {
+        y = y - 1;
+    }
+    
+    Return 0;
+} 
