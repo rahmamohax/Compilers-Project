@@ -42,9 +42,7 @@
 		<Unit filename="symbol_table.cpp" />
 		<Unit filename="symbol_table.h" />
 		<Unit filename="token.cpp" />
-		<Unit filename="token.h">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
+		<Unit filename="token.h" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>

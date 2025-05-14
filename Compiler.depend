@@ -66,3 +66,61 @@
 	<iostream>
 	<stdexcept>
 
+1747249268 source:c:\users\rhmar\github\custom-compiler\compiler.cpp
+	"compiler.h"
+	"scanner.h"
+	"symbol_table.h"
+	"token.h"
+	"parser.h"
+	<iostream>
+	<sstream>
+	<fstream>
+
+1747249168 c:\users\rhmar\github\custom-compiler\compiler.h
+	<string>
+
+1747249170 c:\users\rhmar\github\custom-compiler\scanner.h
+	<string>
+	<vector>
+	"token.h"
+
+1747249170 c:\users\rhmar\github\custom-compiler\token.h
+	<string>
+
+1747245730 c:\users\rhmar\github\custom-compiler\symbol_table.h
+	<string>
+	<vector>
+	<map>
+
+1747249170 c:\users\rhmar\github\custom-compiler\parser.h
+	<vector>
+	<string>
+	<unordered_set>
+	"token.h"
+	"symbol_table.h"
+
+1747249268 source:c:\users\rhmar\github\custom-compiler\main.cpp
+	"compiler.h"
+	<iostream>
+
+1747250263 source:c:\users\rhmar\github\custom-compiler\parser.cpp
+	"parser.h"
+	<iostream>
+	<stdexcept>
+
+1747249169 source:c:\users\rhmar\github\custom-compiler\scanner.cpp
+	"scanner.h"
+	"token.h"
+	<cctype>
+	<iostream>
+	<unordered_map>
+
+1747245730 source:c:\users\rhmar\github\custom-compiler\symbol_table.cpp
+	"symbol_table.h"
+	<stdexcept>
+	<vector>
+	<map>
+
+1747245730 source:c:\users\rhmar\github\custom-compiler\token.cpp
+	"token.h"
+

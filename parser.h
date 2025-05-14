@@ -1,9 +1,9 @@
-
 #ifndef PARSER_H_INCLUDED
 #define PARSER_H_INCLUDED
 
 #include <vector>
 #include <string>
+#include <unordered_set>
 #include "token.h"
 #include "symbol_table.h"
 
@@ -20,6 +20,8 @@ private:
     SymbolTable& symtab;
     size_t current = 0;
     int errorCount = 0;
+    int lastErrorLine = -1; // Track the last line where an error occurred
+    std::unordered_set<int> linesWithErrors; // Track all lines with errors
 
     bool isAtEnd();
     const Token& advance();
